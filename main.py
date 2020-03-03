@@ -7,6 +7,7 @@ import sys
 import random
 from sprites import *
 from settings import *
+from tilemap import *
 from os import path
 
 
@@ -22,24 +23,20 @@ class game:
         self.load_data()
 
     def load_data(self):
-        # Loading map txt file
         game_folder = path.dirname(__file__)
-        self.map_data = []
-        with open(path.join(game_folder, 'map.txt'), 'rt') as f:
-            for line in f:
-                self.map_data.append(line)
+        self.map = Map(path.join(game_folder, 'map.txt'))
 
     def new(self):
         # Start a new game
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
-        for row, tiles in enumerate(self.map_data):
+        for row, tiles in enumerate(self.map.data):
             for col, tile in enumerate(tiles):
                 if tile == '1':
                     Wall(self, col, row)
                 if tile == 'p':
                     self.player = player(self, col, row)
-
+        self.camera = Camera(self.map.width, self.map.height)
 
 
     def run(self):
@@ -47,6 +44,7 @@ class game:
         self.clock.tick(FPS)
         self.playing = True
         while self.playing:
+            self.dt = self.clock.tick(FPS) / 1000
             self.events()
             self.update()
             self.draw()
@@ -54,6 +52,7 @@ class game:
     def update(self):
         # Game loop - update
         self.all_sprites.update()
+        self.camera.update(self.player)
 
     def draw_grid(self):
         for x in range(0, WIDTH, Tilesize):
@@ -65,7 +64,8 @@ class game:
         # Game loop draw
         self.screen.fill(BGColor)
         self.draw_grid()
-        self.all_sprites.draw(self.screen)
+        for sprite in self.all_sprites:
+            self.screen.blit(sprite.image, self.camera.apply(sprite))
         pg.display.flip()
 
     def events(self):
@@ -77,11 +77,6 @@ class game:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_q:
                     self.quit()
-
-                if event.key == pg.K_UP:
-                    self.player.move(dy=-1)
-                if event.key == pg.K_DOWN:
-                    self.player.move(dy=1)
 
 
     def show_start_screen(self):
