@@ -45,11 +45,3 @@ class Wall(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * Tilesize
         self.rect.y = y * Tilesize
-
-
-
-
-class platform(pg.sprite.Sprite):
-    def __init__(self, x, y, w, h):
-        pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface((w, h))

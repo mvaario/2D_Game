@@ -21,20 +21,26 @@ class game:
         self.clock = pg.time.Clock()
         self.load_data()
 
+    def load_data(self):
+        # Loading map txt file
+        game_folder = path.dirname(__file__)
+        self.map_data = []
+        with open(path.join(game_folder, 'map.txt'), 'rt') as f:
+            for line in f:
+                self.map_data.append(line)
+
     def new(self):
         # Start a new game
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
-        self.player = player(self, 10, 10)
-        for x in range(10, 20):
-            Wall(self, x, 5)
+        for row, tiles in enumerate(self.map_data):
+            for col, tile in enumerate(tiles):
+                if tile == '1':
+                    Wall(self, col, row)
+                if tile == 'p':
+                    self.player = player(self, col, row)
 
-    def load_data(self):
-        game_folder = path.dirname(__file__)
-        map_data = []
-        with open(path.join(game_folder, 'map.txt'), 'rt') as f:
-            for line in f:
-                map_data.append(line)
+
 
     def run(self):
         # Game loop
